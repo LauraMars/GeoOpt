@@ -7,6 +7,8 @@
         b: List of Points
         c: list of angles
         d: exploded mesh
+        e: moved_faces
+        f: panels_with_openings
         """
         
 
@@ -23,16 +25,18 @@ import ghpythonlib.components as ghc
 
 meshFaces=[]
 faces= len(m.Faces)
-for j in range(faces):
-    mesh= m.FaceNormals[j]
-    vector= rg.Vector3d(mesh)
-    vector_reverse= vector.Negate(vector)
-    meshFaces.append(vector_reverse)
-
-a=meshFaces
-print(a)
+m.FaceNormals.ComputeFaceNormals()
+a=m.FaceNormals
 
 
+
+#for j in range(faces):
+#    mesh= m.FaceNormals[j]
+#    vector= rg.Vector3d(mesh)
+#    vector_reverse= vector.Negate(vector)
+#    meshFaces.append(vector_reverse)
+
+#a=meshFaces
 
 
 #2.
@@ -94,10 +98,9 @@ d = exploded
 #the result should be a mesh that responds to the sun position... its up to you!
 
 
-
-
 # I am trying to move the mesh faces in relation to the sun vector and scale them in relation to the angle value 
 #SUPPORT WITH DAI
+
 
 #0 Remap angle values to control the range of the scale
 remaped_angles=[]
@@ -106,17 +109,16 @@ max_offset=max_off #reverse
 for i in angleList:
     remaped = ( (i - min(angleList)) / (max(angleList) - min(angleList)) ) * (max_offset - min_offset) + min_offset
     remaped_angles.append(remaped)
-
-
 #1.move faces in relation to sun vector
 moved_faces=[]
 
 for i in range(len(exploded)):
     face=rg.Mesh.Duplicate(exploded[i])
     vector = s+rg.Vector3d(a[i])/200
-    moved=rg.Mesh.Transform(face,rg.Transform.Translation(-vector/8)) #gives true/false
+    moved=rg.Mesh.Transform(face,rg.Transform.Translation(-vector/8))
     moved_faces.append(face)
-
+    
+e= moved_faces
 
 
 #2.scale faces in relation to angle value
@@ -144,10 +146,11 @@ offset_outlines=[]
 for i in range(len(joined_moved)):
     #convert mesh to surface
     face_points=rg.Mesh.Vertices.GetValue(moved_faces[i])
-    surface=rg.NurbsSurface.CreateFromPoints([rg.Point3d(pt) for pt in face_points],2,2,2,2)#list_comprehension 
+    surface=rg.NurbsSurface.CreateFromPoints([rg.Point3d(pt) for pt in face_points],2,2,2,2)
     offseted=rg.Curve.OffsetOnSurface(joined_moved[i],surface,remaped_angles[i],.001)[0]
     offset_outlines.append(offseted)
-#########################
+
+
 outlines=[]
 for i in exploded:
     FaceOutlines=rg.Mesh.GetNakedEdges(i)
@@ -170,13 +173,7 @@ for i in range(len(offset_outlines)):
     lofted=rg.Brep.CreateFromLoft(curves_list,rg.Point3d.Unset,rg.Point3d.Unset,rg.LoftType.Normal,False)[0]
     panels_with_openings.append(lofted)
 
-
-
-
-
-
-
-
+f= panels_with_openings
 
 """
 move_point=[]
@@ -209,8 +206,7 @@ for i in V_mesh:
 
 f = th.list_to_tree(AllVert)
 
-
-#move face
 """
+
 
 
